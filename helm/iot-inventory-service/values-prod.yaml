@@ -1,0 +1,5 @@
+replicaCount: 4
+ingress:
+  host: iot-api.prod.verizon-dummy.example.com
+autoscaling:
+  maxReplicas: 12

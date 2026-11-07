@@ -1,0 +1,48 @@
+namespace: iot-platform
+replicaCount: 2
+
+image:
+  repository: registry.verizon-dummy.example.com/iot-platform/iot-inventory-service
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: iot-api.verizon-dummy.example.com
+  tlsSecret: iot-api-tls
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+    cert-manager.io/cluster-issuer: dummy-letsencrypt
+  # only these path prefixes are exposed externally; anything else is cluster-internal only
+  paths:
+    - /api/v1/inventory/sims
+
+config:
+  SPRING_PROFILES_ACTIVE: prod
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: iot-kafka-0.iot-kafka-headless.messaging.svc.cluster.local:9092,iot-kafka-1.iot-kafka-headless.messaging.svc.cluster.local:9092
+  SPRING_DATASOURCE_URL: jdbc:postgresql://iot-postgres.databases.svc.cluster.local:5432/inventorydb
+  SPRING_DATASOURCE_USERNAME: inventorydb_user
+  APP_INVENTORY_LOW_STOCK_THRESHOLD: "500"
+
+secrets:
+  dbPassword: change-me-dummy
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPU: 70

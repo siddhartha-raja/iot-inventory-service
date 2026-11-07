@@ -1,0 +1,6 @@
+apiVersion: v2
+name: iot-inventory-service
+description: Owns SIM stock, reservations and release/compensation
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
